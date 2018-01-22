@@ -1,0 +1,54 @@
+{
+    "W1": {
+        "wavelength": {
+            "min": 2.75,
+            "max": 3.87,
+            "eff": 3.4,
+            "unit": "um"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 309.54,
+            "unit": "Jy"
+        }
+    },
+    "W2": {
+        "wavelength": {
+            "min": 3.96,
+            "max": 5.34,
+            "eff": 4.6,
+            "unit": "um"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 171.787,
+            "unit": "Jy"
+        }
+    },
+    "W3": {
+        "wavelength": {
+            "min": 7.44,
+            "max": 17.26,
+            "eff": 12,
+            "unit": "um"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 31.674,
+            "unit": "Jy"
+        }
+    },
+    "W4": {
+        "wavelength": {
+            "min": 19.52,
+            "max": 27.91,
+            "eff": 22,
+            "unit": "um"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 8.363,
+            "unit": "Jy"
+        }
+    }
+}

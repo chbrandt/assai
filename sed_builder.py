@@ -1,4 +1,6 @@
-from __future__ import print_function
+#!/usr/bin/env python
+
+from __future__ import absolute_import, print_function
 import logging
 
 import os
@@ -9,8 +11,8 @@ sys.path.insert(0,os.path.join(_here,'catalogs'))
 from core import Catalog
 from filters import Filter
 
-# _CATALOGS = ['first','wise','sdss','galex','xmm']
-_CATALOGS = ['first','wise','sdss','galex']
+# _CATALOGS = ['xmm']
+_CATALOGS = ['first','wise','sdss','galex','hers','xmm']
 _RADIUS = 1E-3 #degree
 
 def search_catalog(ra,dec,catalog_name,search_radius=_RADIUS):

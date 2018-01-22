@@ -1,0 +1,72 @@
+{
+    "u": {
+        "wavelength": {
+            "min": 3048,
+            "max": 4028,
+            "eff": 3543,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 1568.5,
+            "unit": "Jy",
+            "b": 1.4e-10
+        }
+    },
+    "g": {
+        "wavelength": {
+            "min": 3783,
+            "max": 5549,
+            "eff": 4770,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 3965.9,
+            "unit": "Jy",
+            "b": 9e-11
+        }
+    },
+    "r": {
+        "wavelength": {
+            "min": 5415,
+            "max": 6989,
+            "eff": 6231,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 3162.0,
+            "unit": "Jy",
+            "b": 1.2e-10
+        }
+    },
+    "i": {
+        "wavelength": {
+            "min": 6689,
+            "max": 8389,
+            "eff": 7625,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 2602.0,
+            "unit": "Jy",
+            "b": 1.8e-10
+        }
+    },
+    "z": {
+        "wavelength": {
+            "min": 7960,
+            "max": 10833,
+            "eff": 9134,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 2244.7,
+            "unit": "Jy",
+            "b": 7.4e-10
+        }
+    }
+}

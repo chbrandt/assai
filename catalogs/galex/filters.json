@@ -1,0 +1,30 @@
+{
+    "FUV": {
+        "wavelength": {
+            "min": 1344,
+            "max": 1786,
+            "eff": 1538.6,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 1.4e-15,
+            "unit": "erg s-1 cm-2 angstrom-1",
+            "mag": 18.82
+        }
+    },
+    "NUV": {
+        "wavelength": {
+            "min": 1771,
+            "max": 2831,
+            "eff": 2315.7,
+            "unit": "angstrom"
+        },
+        "zeropoint": {
+            "system": "vega",
+            "flux": 2.06e-16,
+            "unit": "erg s-1 cm-2 angstrom-1",
+            "mag": 20.08
+        }
+    }
+}

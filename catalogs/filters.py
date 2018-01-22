@@ -23,9 +23,13 @@ class Filter:
         _wu = units.Unit('Hz')
         _mu = units.Unit(unit)
         unit = _mu / _wu
-        flx = self.phot.flux_density(mag,band,unit)
-        freq = self.phot.wavelength(band).to(_wu,units.spectral())
-        return flx * freq
+        if hasattr(self.phot, 'flux_density'):
+            flx = self.phot.flux_density(mag, band, unit)
+            freq = self.phot.wavelength(band).to(_wu, units.spectral())
+            return flx * freq
+        else:
+            return self.phot.flux(mag, band, unit)
+
 
     def wavelength(self,band,unit):
         return self.phot.wavelength(band).to(unit,units.spectral())

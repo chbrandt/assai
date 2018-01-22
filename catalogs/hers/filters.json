@@ -1,0 +1,26 @@
+{
+    "250um": {
+        "wavelength": {
+            "min": 196,
+            "max": 298,
+            "eff": 242,
+            "unit": "um"
+        }
+    },
+    "350um": {
+        "wavelength": {
+            "min": 277,
+            "max": 423,
+            "eff": 340,
+            "unit": "um"
+        }
+    },
+    "500um": {
+        "wavelength": {
+            "min": 386,
+            "max": 679,
+            "eff": 482,
+            "unit": "um"
+        }
+    }
+}
