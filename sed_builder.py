@@ -1,26 +1,51 @@
 #!/usr/bin/env python
-
 from __future__ import absolute_import, print_function
-import logging
 
+import warnings
+warnings.simplefilter('ignore')
+
+import logging
+#logging.basicConfig(level=logging.ERROR)
+
+# I here include the place where the catalogs are defined
+#
 import os
 _here = os.path.dirname(os.path.abspath(__file__))
 import sys
-sys.path.insert(0,os.path.join(_here,'catalogs'))
+sys.path.insert(0, os.path.join(_here, 'catalogs'))
 
-from core import Catalog
-from filters import Filter
+# Catalogs -- as packages -- must provide a 'search' function,
+# informations about filters (wavelengths) associated to their
+# flux columns
+# The Catalog and Filter classes are for...
+#
+from catalogs.core import Catalog
+from catalogs.filters import Filter
 
-# _CATALOGS = ['xmm']
-_CATALOGS = ['first','wise','sdss','galex','hers','xmm']
-_RADIUS = 1E-3 #degree
 
-def search_catalog(ra,dec,catalog_name,search_radius=_RADIUS):
+#_CATALOGS = ['first', 'wise', 'sdss', 'galex', 'hers', 'xmm']
+#_RADIUS = 1E-3 #degree
+
+
+def search_catalog(ra, dec, radius, catalog_name):
+    """
+    Return a `Catalog` instance with retrieved data
+
+    Input:
+     - ra,dec : coordinates in degree units
+     - radius : float or astropy.Angle
+        If float, it is assumed a value in 'arcsec' units
+    """
     from importlib import import_module
     mod = import_module(catalog_name)
 
+    try:
+        radius = radius.degree
+    except:
+        radius = float(radius)/3600
+
     # Query catalog data
-    tab = mod.search(ra,dec,search_radius)
+    tab = mod.search(ra,dec,radius)
 
     # Init catalog filters
     flt = Filter(mod.filters)
@@ -37,22 +62,12 @@ def search_catalog(ra,dec,catalog_name,search_radius=_RADIUS):
 
     return cat
 
+
 def search_waveband(object_name,waveband):
     pass
 
-def search_data(object_name,catalog=None,waveband=None):
-    name = object_name
-    # Get the object's coordinates
-    #
-    from tools.bin import resolve_name
-    pos = resolve_name.name2coords(object_name)
-    if pos:
-        ra,dec = pos
-        logging.info("Object '{}' RA,Dec: {},{}".format(name,ra,dec))
-    else:
-        logging.error("Oject {} could not be resolved.".format(object_name))
-        return None
 
+def search_position(ra, dec, radius, catalogs):
     # Init what will be the output table:
     # flux
     # flux_err
@@ -71,17 +86,17 @@ def search_data(object_name,catalog=None,waveband=None):
     # sed_cols=['flux','frequency','catalog']
     sed_tab = None
 
-    catalogs = [catalog] if catalog else _CATALOGS
     for catalog in catalogs:
 
-        cat = search_catalog(ra,dec,catalog,search_radius=0.01)
+        print('Searching catalog: {}'.format(catalog))
+        cat = search_catalog(ra, dec, radius, catalog)
 
         if not cat:
             print("> Failed to query/retrieve data")
             continue
         print("> {:d} objects found".format(len(cat.table)))
 
-        _ = cat.xmatch(ra,dec)#ra,dec,flux_tab['ra'],flux_tab['dec'])
+        _ = cat.xmatch(ra,dec)
 
         flux_tab = cat.flux_table('Hz')
         flux_tab = flux_tab.dropna()
@@ -97,22 +112,45 @@ def search_data(object_name,catalog=None,waveband=None):
             data['flux'].extend( flux_tab[flx_col] )
             data['freq'].extend( flux_tab[frq_col] )
         sed_tab = push(sed_tab,**data)
+
     return sed_tab
 
 
+def search_object(name, radius, catalogs):
+
+    # Get the object's coordinates
+    #
+    from catalogs.tools import resolve_name
+    pos = resolve_name(name)
+    if pos:
+        ra,dec = pos
+        logging.info("Object '{}' RA,Dec: {},{}".format(name,ra,dec))
+    else:
+        logging.error("Object {} could not be resolved.".format(name))
+        return None
+
+    sed_tab = search_position(ra, dec, radius, catalogs)
+    return sed_tab
+
 
 if __name__ == '__main__':
-    import sys
-    try:
-        object_name = sys.argv[1]
-    except:
-        print('Usage:\n\t{} <object_name>'.format(os.path.basename(sys.argv[0])))
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--radius', type=float, default=5,
+                        help="Search radius (arc seconds)")
+    parser.add_argument('object', type=str,
+                        help="Name of the object to search")
+    args = parser.parse_args()
 
-    sed_tab = search_data(object_name)
+    import catalogs
+    cats = catalogs.__all__
+
+    sed_tab = search_object(args.object, args.radius, cats)
+
     if sed_tab is None:
         print('SED table returned null')
         sys.exit(1)
 
     print("\nFinal flux table:")
     print(sed_tab)
+
