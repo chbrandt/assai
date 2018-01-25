@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from plot import plot
-from plot import element
-from sed_builder import search_object, search_position
+from .plot import plot
+from .plot import element
+from .search import xmatch_object, xmatch_position
 
 def hello_world():
     pass
@@ -13,7 +13,7 @@ class Assai(object):
 
     def __init__(self):
         self.catalogs = ['first', 'wise', 'sdss', 'galex', 'hers', 'xmm']
-        self.setup_plot()
+        self.init_plot()
 
     def setup_control(self):
         from bokeh.models.widgets import Div
@@ -23,15 +23,17 @@ class Assai(object):
         text = TextInput(value="3c279")
 
         from bokeh.models.widgets import RadioGroup
-        group = RadioGroup(labels=["object", "position"], active=1, inline=True)
+        group = RadioGroup(labels=["object", "position"], active=0, inline=True)
 
         def func(*args,**kwargs):
             t = text.value
-            if not group.active:
-                p = plot.SED(t)
-                self.search(t, p)
-                p.draw()
-                self.plot.children[1] = p._layout
+            p = plot.SED(t)
+            if group.active:
+                self.search_position(t,p)
+            else:
+                self.search_name(t, p)
+            p.draw()
+            self.plot.children[1] = p._layout
             div.text = t
 
         from bokeh.models import Button
@@ -72,10 +74,10 @@ class Assai(object):
         from bokeh.layouts import column,row
         return row(column(text,group),btn, div, btn2)
 
-    def setup_plot(self):
+    def init_plot(self):
         from bokeh.layouts import column
         p = plot.SED('SED')
-        self.search('mrk421', p)
+#        self.search_position('0,0', p)
         p.draw()
         control = self.setup_control()
         panel = column(control,p._layout)
@@ -85,15 +87,33 @@ class Assai(object):
         from bokeh.io import show
         show(self.plot)
 
-    def search(self, name, plot):
-        data = search_object(name, radius=5, catalogs=self.catalogs)
-        for survey,group in data.groupby('catalog'):
-            el = element.Element(survey,group,y='flux',x='freq')
-            plot.add_element(el)
+    def search_position(self, pos, plot):
+        pos_ = pos.split(',')
+        if len(pos_) == 1:
+            pos_ == pos.split()
+        try:
+            ra,dec = [float(p.strip()) for p in pos_]
+        except:
+            msg = "Expecting string of 'ra_j2000, dec_j2000' values, instead got '{}'"
+            raise ValueError(msg.format(pos))
+        data = xmatch_position(ra, dec, radius=5, catalogs=self.catalogs)
+        ingest_data(data, plot)
+
+    def search_name(self, name, plot):
+        data = xmatch_object(name, radius=5, catalogs=self.catalogs)
+        ingest_data(data, plot)
 
     @property
     def layout(self):
         return self.plot
+
+
+def ingest_data(data, plot):
+    if data is not None:
+        assert all(col in data.columns for col in ['catalog','flux','freq'])
+        for survey,group in data.groupby('catalog'):
+            el = element.Element(survey,group,y='flux',x='freq')
+            plot.add_element(el)
 
 
 

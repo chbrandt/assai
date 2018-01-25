@@ -9,25 +9,33 @@ import logging
 
 # I here include the place where the catalogs are defined
 #
-import os
-_here = os.path.dirname(os.path.abspath(__file__))
 import sys
-sys.path.insert(0, os.path.join(_here, 'catalogs'))
+import os
+from os.path import dirname,abspath,join
+
+if 'ASSAI_DATA' in os.environ:
+    catsdir = os.environ['ASSAI_DATA']
+else:
+    catsdir = join(dirname(abspath(__file__)),'catalogs')
+
+sys.path.insert(0, catsdir)
+print("Path:", sys.path)
 
 # Catalogs -- as packages -- must provide a 'search' function,
 # informations about filters (wavelengths) associated to their
 # flux columns
 # The Catalog and Filter classes are for...
 #
-from catalogs.core import Catalog
-from catalogs.filters import Filter
+from .catalogs.tools import resolve_name
+from .catalogs.core import Catalog
+from .catalogs.filters import Filter
 
 
 #_CATALOGS = ['first', 'wise', 'sdss', 'galex', 'hers', 'xmm']
 #_RADIUS = 1E-3 #degree
 
 
-def search_catalog(ra, dec, radius, catalog_name):
+def query_catalog(ra, dec, radius, catalog_name):
     """
     Return a `Catalog` instance with retrieved data
 
@@ -37,8 +45,17 @@ def search_catalog(ra, dec, radius, catalog_name):
         If float, it is assumed a value in 'arcsec' units
     """
     from importlib import import_module
-    mod = import_module(catalog_name)
-
+    print('Path search:',sys.path)
+    try:
+        mod = import_module(catalog_name)
+    except:
+        print("Module '{}' not found".format(catalog_name))
+        return None
+#    import importlib.util
+#    file_ = join(catsdir,catalog_name,'__init__.py')
+#    spec = importlib.util.spec_from_file_location(catalog_name, file_)
+#    mod = importlib.util.module_from_spec(spec)
+#    spec.loader.exec_module(mod)
     try:
         radius = radius.degree
     except:
@@ -83,23 +100,35 @@ def search_position(ra, dec, radius, catalogs):
             return sed_tab
         return table.append(sed_tab)
 
-    # sed_cols=['flux','frequency','catalog']
-    sed_tab = None
-
+    out = []
     for catalog in catalogs:
 
         print('Searching catalog: {}'.format(catalog))
-        cat = search_catalog(ra, dec, radius, catalog)
+        cat = query_catalog(ra, dec, radius, catalog)
 
         if not cat:
             print("> Failed to query/retrieve data")
             continue
         print("> {:d} objects found".format(len(cat.table)))
 
+        out.append(cat)
+
+    return out
+
+
+def xmatch_position(ra, dec, radius, catalogs):
+
+    res = search_position(ra, dec, radius, catalogs)
+
+    # sed_cols=['flux','frequency','catalog']
+    sed_tab = None
+
+    for cat in res:
         _ = cat.xmatch(ra,dec)
 
         flux_tab = cat.flux_table('Hz')
         flux_tab = flux_tab.dropna()
+
         cols = flux_tab.columns
         if len(cols) == 0:
             continue
@@ -107,20 +136,22 @@ def search_position(ra, dec, radius, catalogs):
         data = dict(flux = [],
                     freq = [],
                     catalog = catalog)
+        
         frq_col = cols[-1]
+
         for flx_col in cols[:-1]:
             data['flux'].extend( flux_tab[flx_col] )
             data['freq'].extend( flux_tab[frq_col] )
+        
         sed_tab = push(sed_tab,**data)
 
     return sed_tab
 
 
-def search_object(name, radius, catalogs):
+def xmatch_object(name, radius, catalogs):
 
     # Get the object's coordinates
     #
-    from catalogs.tools import resolve_name
     pos = resolve_name(name)
     if pos:
         ra,dec = pos
@@ -129,7 +160,7 @@ def search_object(name, radius, catalogs):
         logging.error("Object {} could not be resolved.".format(name))
         return None
 
-    sed_tab = search_position(ra, dec, radius, catalogs)
+    sed_tab = xmatch_position(ra, dec, radius, catalogs)
     return sed_tab
 
 

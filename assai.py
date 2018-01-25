@@ -1,9 +1,13 @@
-
-from assai import Assai
+#!/usr/bin/env python
 
 from bokeh.io import curdoc,show
 
+from assai import Assai
+
 sed = Assai()
-curdoc().add_root(sed.layout)
-#show(sed.layout)
+
+if __name__ == '__main__':
+    show(sed.layout)
+else:
+    curdoc().add_root(sed.layout)
 
