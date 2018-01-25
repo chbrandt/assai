@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import sys
 
 from .plot import plot
 from .plot import element
@@ -14,10 +15,20 @@ class Assai(object):
     def __init__(self):
         self.catalogs = ['first', 'wise', 'sdss', 'galex', 'hers', 'xmm']
         self.init_plot()
+        self.syspath_bug = sys.path[:]
+
+    def init_plot(self):
+        from bokeh.layouts import column
+        p = plot.SED('SED')
+        #self.search_position('0,0', p)
+        p.draw()
+        control = self.setup_control()
+        panel = column(control,p._layout)
+        self.plot = panel
 
     def setup_control(self):
-        from bokeh.models.widgets import Div
-        div = Div(text="""bla""",width=20, height=10)
+        #from bokeh.models.widgets import Div
+        #div = Div(text="""bla""",width=20, height=10)
 
         from bokeh.models.widgets import TextInput
         text = TextInput(value="3c279")
@@ -25,7 +36,8 @@ class Assai(object):
         from bokeh.models.widgets import RadioGroup
         group = RadioGroup(labels=["object", "position"], active=0, inline=True)
 
-        def func(*args,**kwargs):
+        def research(*args,**kwargs):
+            sys.path = self.syspath_bug
             t = text.value
             p = plot.SED(t)
             if group.active:
@@ -34,18 +46,11 @@ class Assai(object):
                 self.search_name(t, p)
             p.draw()
             self.plot.children[1] = p._layout
-            div.text = t
 
         from bokeh.models import Button
         btn = Button(label='search', button_type='success')
-        btn.on_click(func)
+        btn.on_click(research)
 
-        def down(*args,**kwargs):
-            content = 'yay'
-            div2 = Div(text=content,width=20, height=10)
-            from bokeh.io import show
-            from bokeh.layouts import widgetbox
-            show(widgetbox(div2))
         js_download = """
             var filetext = 'itemnum,storename,date,usage,netsales\\n';
             var filename = 'results.csv';
@@ -72,16 +77,7 @@ class Assai(object):
         btn2.callback = CustomJS(code=js_download)
 
         from bokeh.layouts import column,row
-        return row(column(text,group),btn, div, btn2)
-
-    def init_plot(self):
-        from bokeh.layouts import column
-        p = plot.SED('SED')
-#        self.search_position('0,0', p)
-        p.draw()
-        control = self.setup_control()
-        panel = column(control,p._layout)
-        self.plot = panel
+        return row(column(text,group),btn, btn2)
 
     def show(self):
         from bokeh.io import show

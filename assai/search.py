@@ -7,20 +7,6 @@ warnings.simplefilter('ignore')
 import logging
 #logging.basicConfig(level=logging.ERROR)
 
-# I here include the place where the catalogs are defined
-#
-import sys
-import os
-from os.path import dirname,abspath,join
-
-if 'ASSAI_DATA' in os.environ:
-    catsdir = os.environ['ASSAI_DATA']
-else:
-    catsdir = join(dirname(abspath(__file__)),'catalogs')
-
-sys.path.insert(0, catsdir)
-print("Path:", sys.path)
-
 # Catalogs -- as packages -- must provide a 'search' function,
 # informations about filters (wavelengths) associated to their
 # flux columns
@@ -34,6 +20,20 @@ from .catalogs.filters import Filter
 #_CATALOGS = ['first', 'wise', 'sdss', 'galex', 'hers', 'xmm']
 #_RADIUS = 1E-3 #degree
 
+# I here include the place where the catalogs are defined
+#
+import sys
+import os
+from os.path import dirname,abspath,join
+
+if 'ASSAI_DATA' in os.environ:
+    catsdir = os.environ['ASSAI_DATA']
+else:
+    catsdir = join(dirname(abspath(__file__)),'catalogs')
+
+sys.path.insert(0, catsdir)
+
+print("Path:", sys.path)
 
 def query_catalog(ra, dec, radius, catalog_name):
     """
@@ -93,14 +93,8 @@ def search_position(ra, dec, radius, catalogs):
     # epoch
     # epoch_delta
     #
-    def push(table,**kwargs):
-        from pandas import DataFrame
-        sed_tab = DataFrame(kwargs)
-        if table is None:
-            return sed_tab
-        return table.append(sed_tab)
-
-    out = []
+    from collections import OrderedDict
+    out = OrderedDict()
     for catalog in catalogs:
 
         print('Searching catalog: {}'.format(catalog))
@@ -111,7 +105,7 @@ def search_position(ra, dec, radius, catalogs):
             continue
         print("> {:d} objects found".format(len(cat.table)))
 
-        out.append(cat)
+        out[catalog] = cat
 
     return out
 
@@ -123,7 +117,7 @@ def xmatch_position(ra, dec, radius, catalogs):
     # sed_cols=['flux','frequency','catalog']
     sed_tab = None
 
-    for cat in res:
+    for name,cat in res.items():
         _ = cat.xmatch(ra,dec)
 
         flux_tab = cat.flux_table('Hz')
@@ -135,7 +129,7 @@ def xmatch_position(ra, dec, radius, catalogs):
 
         data = dict(flux = [],
                     freq = [],
-                    catalog = catalog)
+                    catalog = name)
         
         frq_col = cols[-1]
 
@@ -146,6 +140,14 @@ def xmatch_position(ra, dec, radius, catalogs):
         sed_tab = push(sed_tab,**data)
 
     return sed_tab
+
+
+def push(table,**kwargs):
+    from pandas import DataFrame
+    sed_tab = DataFrame(kwargs)
+    if table is None:
+        return sed_tab
+    return table.append(sed_tab)
 
 
 def xmatch_object(name, radius, catalogs):
