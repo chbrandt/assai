@@ -33,7 +33,7 @@ else:
 
 sys.path.insert(0, catsdir)
 
-print("Path:", sys.path)
+#print("Path:", sys.path)
 
 def query_catalog(ra, dec, radius, catalog_name):
     """
@@ -45,7 +45,7 @@ def query_catalog(ra, dec, radius, catalog_name):
         If float, it is assumed a value in 'arcsec' units
     """
     from importlib import import_module
-    print('Path search:',sys.path)
+    #print('Path search:',sys.path)
     try:
         mod = import_module(catalog_name)
     except:

@@ -20,7 +20,6 @@ class Assai(object):
     def init_plot(self):
         from bokeh.layouts import column
         p = plot.SED('SED')
-        #self.search_position('0,0', p)
         p.draw()
         control = self.setup_control()
         panel = column(control,p._layout)
@@ -40,10 +39,7 @@ class Assai(object):
             sys.path = self.syspath_bug
             t = text.value
             p = plot.SED(t)
-            if group.active:
-                self.search_position(t,p)
-            else:
-                self.search_name(t, p)
+            self.search_object(t, p)
             p.draw()
             self.plot.children[1] = p._layout
 
@@ -83,20 +79,8 @@ class Assai(object):
         from bokeh.io import show
         show(self.plot)
 
-    def search_position(self, pos, plot):
-        pos_ = pos.split(',')
-        if len(pos_) == 1:
-            pos_ == pos.split()
-        try:
-            ra,dec = [float(p.strip()) for p in pos_]
-        except:
-            msg = "Expecting string of 'ra_j2000, dec_j2000' values, instead got '{}'"
-            raise ValueError(msg.format(pos))
-        data = xmatch_position(ra, dec, radius=5, catalogs=self.catalogs)
-        ingest_data(data, plot)
-
-    def search_name(self, name, plot):
-        data = xmatch_object(name, radius=5, catalogs=self.catalogs)
+    def search_object(self, obj, plot):
+        data = xmatch_object(obj, radius=5, catalogs=self.catalogs)
         ingest_data(data, plot)
 
     @property
