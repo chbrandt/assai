@@ -32,8 +32,8 @@ class Assai(object):
         from bokeh.models.widgets import TextInput
         text = TextInput(value="3c279")
 
-        from bokeh.models.widgets import RadioGroup
-        group = RadioGroup(labels=["object", "position"], active=0, inline=True)
+        #from bokeh.models.widgets import RadioGroup
+        #group = RadioGroup(labels=["object", "position"], active=0, inline=True)
 
         def research(*args,**kwargs):
             sys.path = self.syspath_bug
@@ -48,7 +48,17 @@ class Assai(object):
         btn.on_click(research)
 
         js_download = """
-            var filetext = 'itemnum,storename,date,usage,netsales\\n';
+            var csv = source.data;
+            var filetext = 'catalog,flux,freq\\n';
+            for (i=0; i < csv['catalog'].length; i++) {
+                var currRow = [csv['catalog'][i].toString(),
+                               csv['flux'][i].toString(),
+                               csv['freq'][i].toString().concat('\\n')];
+                
+                var joined = currRow.join();
+                filetext = filetext.concat(joined);
+            }
+             
             var filename = 'results.csv';
             var blob = new Blob([filetext], { type: 'text/csv;charset=utf-8;' });
             if (navigator.msSaveBlob) { // IE 10+
@@ -67,13 +77,16 @@ class Assai(object):
             }
             }"""
 
+        from bokeh.models import ColumnDataSource
+        source = ColumnDataSource({'catalog':['a','b','c'],'flux':[1,2,3],'freq':[1,2,3]})
+
         from bokeh.models import Button
         btn2 = Button(label='download', button_type='success')
         from bokeh.models.callbacks import CustomJS
-        btn2.callback = CustomJS(code=js_download)
+        btn2.callback = CustomJS(args=dict(source=source), code=js_download)
 
         from bokeh.layouts import column,row
-        return row(column(text,group),btn, btn2)
+        return row(text,btn, btn2)
 
     def show(self):
         from bokeh.io import show

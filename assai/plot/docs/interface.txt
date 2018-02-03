@@ -1,0 +1,15 @@
+>>> data_nvss = pandas.read_csv('nvss.csv')
+>>> data_sdss = pandas.read_csv('sdss.csv')
+>>> data_xmm  = pandas.read_csv('xmm.csv')
+>>>
+>>> from plot import element
+>>> el_NVSS = element.Element('nvss', data=data_nvss, x='free', y='flux', xunit='Hz', yunit='Jy', tag='radio')
+>>> el_SDSS = element.Element('sdss', data=data_sdss, x='lambda', y'flux', xunit='nm', yunit='mW/m2', tag='optical')
+>>> el_XMM = element.Element('xmm', data=data_xmm, x='en', y='flux', xunit='keV', yunit='mW/m2', tag='x-ray')
+>>>
+>>> els = element.ElementsList('dataset_one', elements=[el_NVSS,el_SDSS,el_XMM], xunit='Hz', yunit='mW/m2')
+>>>
+>>> from plot import SED
+>>> sed = SED('test', x='Frequency', y='Flux', xunit='Hz', yunit='mW/m2', ylog=True, xlog=True)
+>>> sed.add_elementsList(els)
+>>> sed.plot()
