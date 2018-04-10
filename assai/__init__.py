@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 import sys
 
-from .plot import plot
-from .plot import element
+from .plot.plot import plot
+from .plot.plot import element
 from .search import xmatch_object, xmatch_position
 
 def hello_world():
@@ -54,11 +54,11 @@ class Assai(object):
                 var currRow = [csv['catalog'][i].toString(),
                                csv['flux'][i].toString(),
                                csv['freq'][i].toString().concat('\\n')];
-                
+
                 var joined = currRow.join();
                 filetext = filetext.concat(joined);
             }
-             
+
             var filename = 'results.csv';
             var blob = new Blob([filetext], { type: 'text/csv;charset=utf-8;' });
             if (navigator.msSaveBlob) { // IE 10+
