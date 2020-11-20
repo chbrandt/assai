@@ -11,7 +11,18 @@ energy distribution plot.
 Nevertheless, the tool also provide the query-only interface for the
 user not interested in graphical outputs.
 
-## howto
+
+## Run
+
+```bash
+$ python assai.py
+```
+
+A new file `assai.html` is created and a web browser window/tab should open
+rendering it.
+
+
+## Howto add a resource/catalog
 
 `assai` reads the catalog services defined in `$ASSAI_DATA`, where
 each service is defined by a json file or python package.
