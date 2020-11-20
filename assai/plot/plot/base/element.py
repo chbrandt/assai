@@ -144,7 +144,7 @@ class ElementsListBase(BaseComponentContainer):
 
         from bokeh import palettes
         if self._palette_type is None:
-            colors = palettes.Colorblind8
+            colors = list(palettes.Colorblind8)
             colors.extend(palettes.Category20_20)
 
             if size and len(colors) < size:
