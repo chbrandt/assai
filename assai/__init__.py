@@ -35,7 +35,7 @@ class Assai(object):
         #from bokeh.models.widgets import RadioGroup
         #group = RadioGroup(labels=["object", "position"], active=0, inline=True)
 
-        def research(*args,**kwargs):
+        def research():
             sys.path = self.syspath_bug
             t = text.value
             p = plot.SED(t)
@@ -83,7 +83,8 @@ class Assai(object):
         from bokeh.models import Button
         btn2 = Button(label='download', button_type='success')
         from bokeh.models.callbacks import CustomJS
-        btn2.callback = CustomJS(args=dict(source=source), code=js_download)
+        # TODO: https://docs.bokeh.org/en/latest/docs/reference/models/widgets.buttons.html#bokeh.models.widgets.buttons.AbstractButton.js_event_callbacks
+        btn2.js_event_callbacks = {'click':[CustomJS(args=dict(source=source), code=js_download)]}
 
         from bokeh.layouts import column,row
         return row(text,btn, btn2)
